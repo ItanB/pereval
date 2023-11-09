@@ -97,7 +97,8 @@ class PerevalAddedSerializer(WritableNestedModelSerializer):
 
             coords = Coords.objects.create(**coords)
             season = Season.objects.create(**season)
-            pereval = PerevalAdded.objects.create(**validated_data, images=images, author=author, coords=coords, season=season)
+            pereval = PerevalAdded.objects.create(**validated_data, images=images, author=author, coords=coords,
+                                                  season=season)
             if images:
                 for im in images:
                     name = im.pop(name)
@@ -125,4 +126,3 @@ class PerevalAddedSerializer(WritableNestedModelSerializer):
                     )
 
             return data
-

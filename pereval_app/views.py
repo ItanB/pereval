@@ -1,10 +1,29 @@
 from django.shortcuts import render
 import django_filters
 from rest_framework.response import Response
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins, generics
 from .serializers import *
 from .models import *
-from django.views.generic import TemplateView
+
+
+class SubmitData(mixins.CreateModelMixin, mixins.ListModelMixin, generics.GenericAPIView):
+    queryset = PerevalAdded.objects.all()
+    serializer_class = PerevalAddedSerializer
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ['users__email']
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        serializer = PerevalAddedSerializer(data=request.data)
+        if serializer.is_valid():
+            obj = serializer.save()
+            return Response({f'status': status.HTTP_201_CREATED, 'message': 'Запись создана', 'id': obj.id})
+        if status.HTTP_400_BAD_REQUEST:
+            return Response({'status': status.HTTP_400_BAD_REQUEST, 'message': serializer.errors})
+        if status.HTTP_500_INTERNAL_SERVER_ERROR:
+            return Response({'status': status.HTTP_500_INTERNAL_SERVER_ERROR, 'message': serializer.errors})
 
 
 class UsersViewSet(viewsets.ModelViewSet):
