@@ -1,6 +1,7 @@
 from .models import *
 from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
+from rest_framework.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -126,3 +127,39 @@ class PerevalAddedSerializer(WritableNestedModelSerializer):
                     )
 
             return data
+
+
+class PerevalDetailSerializer(WritableNestedModelSerializer):
+    user = UserSerializer()
+    images = ImagesSerializer()
+    coords = CoordsSerializer()
+
+    class Meta:
+        model = PerevalAdded
+        fields = [
+            'id',
+            'beautyTitle',
+            'title',
+            'other_titles',
+            'connect',
+            'add_time',
+            'status',
+            'season',
+            'coords',
+            'users',
+            'images'
+        ]
+
+    def validate(self, data):
+        users_data = data.get('users')
+        user = self.instance.user
+        if users_data is not None:
+            if user.first_name != users_data.get('first_name') \
+                    or user.last_name != users_data.get('last_name') \
+                    or user.patronymic != users_data.get('patronymic') \
+                    or user.email != users_data.get('email') \
+                    or user.phone != users_data.get('phone'):
+                raise ValidationError({'message': 'Редактирование пользовательских данных запрещено'})
+
+            return data
+
