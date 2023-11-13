@@ -26,6 +26,24 @@ class SubmitData(mixins.CreateModelMixin, mixins.ListModelMixin, generics.Generi
             return Response({'status': status.HTTP_500_INTERNAL_SERVER_ERROR, 'message': serializer.errors})
 
 
+class SubmitDetailData(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, generics.GenericAPIView):
+    queryset = PerevalAdded.objects.all()
+    serializer_class = PerevalDetailSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = PerevalDetailSerializer(instance=instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            if instance.status != 'new':
+                raise ValidationError(f'Статус данных изменился на: {instance.status}. Редактирование запрещено')
+            serializer.save()
+            return Response({'state': 1, 'message': 'Данные успешно отредактированы'})
+        return Response({'state': 0, 'message': serializer.errors})
+
+
 class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = Users.objects.all()
