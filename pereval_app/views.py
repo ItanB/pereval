@@ -1,4 +1,3 @@
-from django.shortcuts import render
 import django_filters
 from rest_framework.response import Response
 from rest_framework import viewsets, status, mixins, generics
@@ -49,12 +48,24 @@ class UsersViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
 
 
+class CoordsViewSet(viewsets.ModelViewSet):
+    serializer_class = CoordsSerializer
+    queryset = Coords.objects.all()
+
+
+class SeasonViewSet(viewsets.ModelViewSet):
+    serializer_class = SeasonSerializer
+    queryset = Season.objects.all()
+
+
+class ImagesViewSet(viewsets.ModelViewSet):
+    serializer_class = ImagesSerializer
+    queryset = PerevalImage.objects.all()
+
+
 class PerevalAddedViewSet(viewsets.ModelViewSet):
     serializer_class = PerevalAddedSerializer
     queryset = PerevalAdded.objects.all()
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ('users__email',)
-    http_method_names = ['get', 'post', 'head', 'patch', 'options']
 
     def create(self, request, *args, **kwargs):
         serializer = PerevalAddedSerializer(data=request.data)
@@ -102,11 +113,3 @@ class PerevalAddedViewSet(viewsets.ModelViewSet):
                     'message': f'Текущий статус: {pereval.get_status_display()}, данные не могут быть изменены!'
                 }
             )
-
-    def get_queryset(self):
-        queryset = PerevalAdded.objects.all()
-        pereval_id = self.request.query_params.get('users_id', None)
-        users_id = self.request.query_params.get('users_id', None)
-        if pereval_id is not None:
-            queryset = queryset.filter(users_id=users_id)
-            return queryset

@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = [
-            'mail',
+            'email',
             'fam',
             'name',
             'otc',
@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         def save(self, **kwargs):
             self.is_valid()
-            user = Users.objects.filter(mail=self.validated_data.get('mail'))
+            user = Users.objects.filter(mail=self.validated_data.get('email'))
             if user.exists():
                 return user.first()
             else:
@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
                     name=self.validated_data.get('name'),
                     otc=self.validated_data.get('otc'),
                     phone=self.validated_data.get('phone'),
-                    mail=self.validated_data.get('mail'),
+                    mail=self.validated_data.get('email'),
                 )
                 return new_user
 
@@ -63,13 +63,13 @@ class ImagesSerializer(WritableNestedModelSerializer):
 
 class PerevalAddedSerializer(WritableNestedModelSerializer):
     coords = CoordsSerializer()
-    category = SeasonSerializer()
+    season = SeasonSerializer()
     users = UserSerializer()
     images = ImagesSerializer()
 
     class Meta:
         model = PerevalAdded
-        depth = 1
+        # depth = 1
         fields = [
             'id',
             'beautyTitle',
@@ -88,7 +88,7 @@ class PerevalAddedSerializer(WritableNestedModelSerializer):
             season = validated_data.pop('season')
             images = validated_data.pop('images')
 
-            users_ = Users.objects.filter(mail=users['mail'])
+            users_ = Users.objects.filter(mail=users['email'])
             if users_.exists():
                 users_serializer = UserSerializer(data=users)
                 users_serializer.is_valid(raise_exception=True)
@@ -117,7 +117,7 @@ class PerevalAddedSerializer(WritableNestedModelSerializer):
                     instance_users.name != data_users['name'],
                     instance_users.otc != data_users['otc'],
                     instance_users.phone != data_users['phone'],
-                    instance_users.email != data_users['mail'],
+                    instance_users.email != data_users['email'],
                 ]
                 if data_users is not None and any(users_fields_for_validation):
                     raise serializers.ValidationError(
@@ -130,7 +130,7 @@ class PerevalAddedSerializer(WritableNestedModelSerializer):
 
 
 class PerevalDetailSerializer(WritableNestedModelSerializer):
-    user = UserSerializer()
+    users = UserSerializer()
     images = ImagesSerializer()
     coords = CoordsSerializer()
 
@@ -147,18 +147,18 @@ class PerevalDetailSerializer(WritableNestedModelSerializer):
             'season',
             'coords',
             'users',
-            'images'
+            'images',
         ]
 
     def validate(self, data):
         users_data = data.get('users')
-        user = self.instance.user
+        users = self.instance.users
         if users_data is not None:
-            if user.first_name != users_data.get('first_name') \
-                    or user.last_name != users_data.get('last_name') \
-                    or user.patronymic != users_data.get('patronymic') \
-                    or user.email != users_data.get('email') \
-                    or user.phone != users_data.get('phone'):
+            if users.first_name != users_data.get('first_name') \
+                    or users.last_name != users_data.get('last_name') \
+                    or users.otc != users_data.get('otc') \
+                    or users.email != users_data.get('email') \
+                    or users.phone != users_data.get('phone'):
                 raise ValidationError({'message': 'Редактирование пользовательских данных запрещено'})
 
             return data

@@ -1,6 +1,6 @@
 from rest_framework.generics import ListAPIView
-from . import serializers
-from . import models
+from .import serializers
+from .import models
 
 
 class UsersListApiView(ListAPIView):
@@ -28,7 +28,7 @@ class ImagesListAPIView(ListAPIView):
     serializer_class = serializers.ImagesSerializer
 
     def get_queryset(self):
-        return models.Pereval_image.objects.all()
+        return models.PerevalImage.objects.all()
 
 
 class PerevalAddedListAPIView(ListAPIView):

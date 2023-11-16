@@ -66,3 +66,6 @@ class PerevalAdded(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     images = models.ForeignKey(PerevalImage, on_delete=models.CASCADE, default=0)
     status = models.CharField(max_length=20, choices=STATUS, default='new')
+
+    def __str__(self):
+        return f'{self.title}'
